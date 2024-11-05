@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+  auth-service:
+    build: ./auth-service
+    command: python auth_service/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - library-network
+    env_file:
+      - ./.env.dev
+
+  task-service:
+    build: ./task-service
+    command: python task_service/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8002:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - library-network
+    env_file:
+      - ./.env.dev
+
+  project-service:
+    build: ./project_service
+    command: python projects_service/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8003:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - library-network
+    env_file:
+      - ./.env.dev
+
+  user-search-service:
+    build: ./user-search
+    command: python user_search/manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8004:8000"
+    depends_on:
+      - db
+      - redis
+    networks:
+      - library-network
+    env_file:
+      - ./.env.dev
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootroot
+      POSTGRES_DB: library
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5431:5432"
+    networks:
+      - library-network
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    networks:
+      - library-network
+
+networks:
+  library-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
